@@ -1,0 +1,193 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Manager</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: black;
+            color: white;
+        }
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        input, button {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background-color: black;
+            color: white;
+            cursor: pointer;
+        }
+        /* button:hover {
+            background-color: #0056b3;
+        } */
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        @media (max-width: 600px) {
+            .input-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Upcoming Events</h1>
+        <div class="input-group">
+            <input type="text" id="eventTitle" placeholder="Event Title">
+            <input type="date" id="eventDate">
+            <input type="text" id="eventLocation" placeholder="Event Location">
+            <button onclick="addEvent()">Add Event</button>
+        </div>
+        
+        <table id="eventTable">
+            <tr>
+                <th>Title</th>
+                <th>Date</th>
+                <th>Location</th>
+                <th>Add/Delete</th>
+            </tr>
+        </table>
+        <button onclick="findMostAttendedEvent()">Find Event with Most Attendees</button>
+        <h3 id="mostAttendedEvent"></h3>
+    </div>
+    
+    <script>
+       document.addEventListener("DOMContentLoaded", function () {
+        let events = [
+        { title: "Wedding", date: new Date(), location: "Office", attendees: new Set(["Malik", "Joanitta"]) },
+        { title: "Graduation", date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), location: "Convention Center", attendees: new Set(["Luke"]) },
+        { title: "Seminar", date: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000), location: "Library", attendees: new Set(["Denis", "Evelyn"]) }
+    ];
+
+    function displayEvents() {
+        let now = new Date();
+        let nextWeek = new Date();
+        nextWeek.setDate(now.getDate() + 7);
+
+        let upcomingEvents = events.filter(event => {
+            let eventDate = new Date(event.date);
+            return eventDate >= now && eventDate <= nextWeek;
+        });
+
+        let table = document.getElementById("eventTable");
+        table.innerHTML = "<tr><th>Title</th><th>Date</th><th>Location</th><th>Attendees</th><th>Actions</th></tr>";
+
+        upcomingEvents.forEach((event, index) => {
+            let { title, date, location, attendees } = event;
+            let row = table.insertRow();
+            row.insertCell(0).textContent = title;
+            row.insertCell(1).textContent = new Date(date).toLocaleDateString();
+            row.insertCell(2).textContent = location;
+            
+            // Attendees Cell
+            let attendeeCell = row.insertCell(3);
+            attendeeCell.textContent = attendees.size > 0 ? Array.from(attendees).join(", ") : "No attendees";
+
+            // Actions Cell
+            let actionCell = row.insertCell(4);
+            actionCell.classList.add("action-buttons");
+
+            let attendeeInput = document.createElement("input");
+            attendeeInput.type = "text";
+            attendeeInput.placeholder = "Attendee Name";
+
+            let addAttendeeBtn = document.createElement("button");
+            addAttendeeBtn.textContent = "Add";
+            addAttendeeBtn.onclick = () => addAttendee(index, attendeeInput.value);
+
+            let deleteBtn = document.createElement("button");
+            deleteBtn.textContent = "Delete";
+            deleteBtn.onclick = () => deleteEvent(index);
+
+            actionCell.appendChild(attendeeInput);
+            actionCell.appendChild(addAttendeeBtn);
+            actionCell.appendChild(deleteBtn);
+        });
+    }
+
+    window.addEvent = function () {
+        let title = document.getElementById("eventTitle").value;
+        let date = new Date(document.getElementById("eventDate").value);
+        let location = document.getElementById("eventLocation").value;
+
+        if (!title || isNaN(date) || !location) {
+            alert("Please fill all fields correctly.");
+            return;
+        }
+
+        events.push({ title, date, location, attendees: new Set() });
+        displayEvents();
+    };
+
+    window.addAttendee = function (index, attendeeName) {
+        if (!attendeeName.trim()) {
+            alert("Attendee name cannot be empty.");
+            return;
+        }
+
+        events[index].attendees.add(attendeeName);
+        displayEvents();
+    };
+
+    window.deleteEvent = function (index) {
+        events.splice(index, 1);
+        displayEvents();
+    };
+
+    window.findMostAttendedEvent = function () {
+        if (events.length === 0) {
+            document.getElementById("mostAttendedEvent").textContent = "No events available.";
+            return;
+        }
+
+        const mostAttendedEvent = events.reduce((maxEvent, currentEvent) => 
+            currentEvent.attendees.size > maxEvent.attendees.size ? currentEvent : maxEvent
+        , events[0]);
+
+        document.getElementById("mostAttendedEvent").textContent = `Event with the most attendees: ${mostAttendedEvent.title} with ${mostAttendedEvent.attendees.size} attendees.`;
+    };
+
+    displayEvents();
+});
+
+    </script>
+</body>
+</html>
+
+
+
