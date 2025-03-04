@@ -175,7 +175,7 @@
             return;
         }
 
-        const mostAttendedEvent = events.reduce((maxEvent, currentEvent) => 
+        let mostAttendedEvent = events.reduce((maxEvent, currentEvent) => 
             currentEvent.attendees.size > maxEvent.attendees.size ? currentEvent : maxEvent
         , events[0]);
 
