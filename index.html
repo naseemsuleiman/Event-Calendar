@@ -1,193 +1,233 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Event Manager</title>
+    <title>Event Management System</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
+            background-color: #EAF3F8;
+            color: #333;
+            margin: 0;
             padding: 0;
-            background-color: #f9f9f9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
-        .container {
-            max-width: 800px;
-            margin: auto;
-            background: white;
+        h1 {
+            background-color: #4682B4;
+            color: white;
+            width: 100%;
+            text-align: center;
+            padding: 20px 0;
+            margin: 0 0 20px;
+        }
+        h2 {
+            color: #4682B4;
+        }
+        form {
+            background-color: #FFFFFF;
+            border: 1px solid #ccc;
             padding: 20px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            margin: 10px 0;
+            width: 400px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
+        label,
+        input,
+        button {
+            display: block;
+            width: 95%;
+            margin-bottom: 10px;
         }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
+        input,
+        button {
+            padding: 10px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #4682B4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #4169E1;
+        }
+        table {
+            width: 80%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 10px;
             text-align: left;
         }
         th {
-            background-color: black;
+            background-color: #4682B4;
             color: white;
         }
-        .input-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
+        td {
+            background-color: #FFFFFF;
         }
-        input, button {
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-        button {
-            background-color: black;
-            color: white;
-            cursor: pointer;
-        }
-        /* button:hover {
-            background-color: #0056b3;
-        } */
-        .action-buttons {
-            display: flex;
-            gap: 5px;
-            flex-wrap: wrap;
-        }
-        @media (max-width: 600px) {
-            .input-group {
-                flex-direction: column;
-            }
+        .container {
+            width: 80%;
+            max-width: 1200px;
+            margin: 20px auto;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Upcoming Events</h1>
-        <div class="input-group">
-            <input type="text" id="eventTitle" placeholder="Event Title">
-            <input type="date" id="eventDate">
-            <input type="text" id="eventLocation" placeholder="Event Location">
-            <button onclick="addEvent()">Add Event</button>
-        </div>
-        
-        <table id="eventTable">
-            <tr>
-                <th>Title</th>
-                <th>Date</th>
-                <th>Location</th>
-                <th>Add/Delete</th>
-            </tr>
-        </table>
-        <button onclick="findMostAttendedEvent()">Find Event with Most Attendees</button>
-        <h3 id="mostAttendedEvent"></h3>
-    </div>
-    
+    <h1 style="text-align: center;">Event Management System</h1>
+    <h2>Events in the Next 7 Days</h2>
+    <div id="next7DaysEvents"></div>
+    <h2>Event Details</h2>
+    <div id="eventDetails"></div>
+    <h2>Add New Event</h2>
+    <form id="addEventForm">
+        <label for="title">Title:</label>
+        <input type="text" id="title" name="title" required>
+        <label for="date">Date:</label>
+        <input type="date" id="date" name="date" required>
+        <label for="location">Location:</label>
+        <input type="text" id="location" name="location" required>
+        <label for="attendees">Attendees</label>
+        <input type="text" id="attendees" name="attendees" required>
+        <button type="submit">Add Event</button>
+    </form>
+    <h2>Remove Event</h2>
+    <form id="removeEventForm">
+        <label for="removeTitle">Event Title to Remove:</label>
+        <input type="text" id="removeTitle" name="removeTitle" required>
+        <button type="submit">Remove Event</button>
+    </form>
+    <h2>Event with the Most Attendees</h2>
+    <div id="mostAttendeesEvent"></div>
     <script>
-       document.addEventListener("DOMContentLoaded", function () {
         let events = [
-        { title: "Wedding", date: new Date(), location: "Office", attendees: new Set(["Malik", "Joanitta"]) },
-        { title: "Graduation", date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), location: "Convention Center", attendees: new Set(["Luke"]) },
-        { title: "Seminar", date: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000), location: "Library", attendees: new Set(["Denis", "Evelyn"]) }
-    ];
-
-    function displayEvents() {
-        let now = new Date();
-        let nextWeek = new Date();
-        nextWeek.setDate(now.getDate() + 7);
-
-        let upcomingEvents = events.filter(event => {
-            let eventDate = new Date(event.date);
-            return eventDate >= now && eventDate <= nextWeek;
+            {
+                title: "Wedding",
+                date: new Date("2025-02-28"),
+                location: "Nairobi",
+                attendees: new Set(["Alice", "Bob"])
+            },
+            {
+                title: "Birthday",
+                date: new Date("2025-03-02"),
+                location: "Mombasa",
+                attendees: new Set(["Charlie", "David"])
+            },
+            {
+                title: "Baby shower",
+                date: new Date("2025-03-05"),
+                location: "Kisumu",
+                attendees: new Set(["Eve", "Frank"])
+            }
+        ];
+        function updateNext7DaysEvents() {
+            const next7DaysEvents = events.filter(event => {
+                const today = new Date();
+                const nextWeek = new Date(today);
+                nextWeek.setDate(today.getDate() + 7);
+                return event.date >= today && event.date <= nextWeek;
+            }).map(event => {
+                return `<p>${event.title} on ${event.date.toDateString()} at ${event.location}</p>`;
+            }).join("");
+            document.getElementById("next7DaysEvents").innerHTML = next7DaysEvents;
+        }
+        function updateEventDetailsTable() {
+            const eventDetailsTable = `
+                <table>
+                    <tr>
+                        <th>Title</th>
+                        <th>Date</th>
+                        <th>Location</th>
+                        <th>Attendees</th>
+                    </tr>
+                    ${events.map(({ title, date, location, attendees }) => `
+                        <tr>
+                            <td>${title}</td>
+                            <td>${date.toDateString()}</td>
+                            <td>${location}</td>
+                            <td>${attendees.size}</td>
+                        </tr>
+                    `).join('')}
+                </table>
+            `;
+            document.getElementById("eventDetails").innerHTML = eventDetailsTable;
+            updateMostAttendeesEvent();
+        }
+        function updateMostAttendeesEvent() {
+            if (events.length === 0) {
+                document.getElementById("mostAttendeesEvent").innerHTML = "<p>No events available.</p>";
+                return;
+            }
+            let maxAttendeesEvent = events.reduce((maxEvent, event) => {
+                return (event.attendees.size > maxEvent.attendees.size) ? event : maxEvent;
+            });
+            document.getElementById("mostAttendeesEvent").innerHTML = `
+                <p>The event with the most attendees is "${maxAttendeesEvent.title}" with ${maxAttendeesEvent.attendees.size} attendees.</p>
+            `;
+        }
+        updateNext7DaysEvents();
+        updateEventDetailsTable();
+        document.getElementById("addEventForm").addEventListener("submit", function (event) {
+            event.preventDefault();
+            const title = document.getElementById("title").value;
+            const date = new Date(document.getElementById("date").value);
+            const location = document.getElementById("location").value;
+            const attendees = document.getElementById("attendees").value;
+            const newEvent = { title, date, location, attendees: new Set() };
+            events.push(newEvent);
+            updateNext7DaysEvents();
+            updateEventDetailsTable();
+            this.reset();
         });
-
-        let table = document.getElementById("eventTable");
-        table.innerHTML = "<tr><th>Title</th><th>Date</th><th>Location</th><th>Attendees</th><th>Actions</th></tr>";
-
-        upcomingEvents.forEach((event, index) => {
-            let { title, date, location, attendees } = event;
-            let row = table.insertRow();
-            row.insertCell(0).textContent = title;
-            row.insertCell(1).textContent = new Date(date).toLocaleDateString();
-            row.insertCell(2).textContent = location;
-            
-            // Attendees Cell
-            let attendeeCell = row.insertCell(3);
-            attendeeCell.textContent = attendees.size > 0 ? Array.from(attendees).join(", ") : "No attendees";
-
-            // Actions Cell
-            let actionCell = row.insertCell(4);
-            actionCell.classList.add("action-buttons");
-
-            let attendeeInput = document.createElement("input");
-            attendeeInput.type = "text";
-            attendeeInput.placeholder = "Attendee Name";
-
-            let addAttendeeBtn = document.createElement("button");
-            addAttendeeBtn.textContent = "Add";
-            addAttendeeBtn.onclick = () => addAttendee(index, attendeeInput.value);
-
-            let deleteBtn = document.createElement("button");
-            deleteBtn.textContent = "Delete";
-            deleteBtn.onclick = () => deleteEvent(index);
-
-            actionCell.appendChild(attendeeInput);
-            actionCell.appendChild(addAttendeeBtn);
-            actionCell.appendChild(deleteBtn);
+        document.getElementById("removeEventForm").addEventListener("submit", function (event) {
+            event.preventDefault();
+            const removeTitle = document.getElementById("removeTitle").value;
+            events = events.filter(event => event.title !== removeTitle);
+            updateNext7DaysEvents();
+            updateEventDetailsTable();
+            this.reset();
         });
-    }
-
-    window.addEvent = function () {
-        let title = document.getElementById("eventTitle").value;
-        let date = new Date(document.getElementById("eventDate").value);
-        let location = document.getElementById("eventLocation").value;
-
-        if (!title || isNaN(date) || !location) {
-            alert("Please fill all fields correctly.");
-            return;
+        function addAttendee(eventTitle, attendeeName) {
+            const event = events.find(event => event.title === eventTitle);
+            if (event) {
+                event.attendees.add(attendeeName);
+                console.log(`${attendeeName} added to ${eventTitle}`);
+            } else {
+                console.log(`Event with title "${eventTitle}" not found.`);
+            }
         }
-
-        events.push({ title, date, location, attendees: new Set() });
-        displayEvents();
-    };
-
-    window.addAttendee = function (index, attendeeName) {
-        if (!attendeeName.trim()) {
-            alert("Attendee name cannot be empty.");
-            return;
-        }
-
-        events[index].attendees.add(attendeeName);
-        displayEvents();
-    };
-
-    window.deleteEvent = function (index) {
-        events.splice(index, 1);
-        displayEvents();
-    };
-
-    window.findMostAttendedEvent = function () {
-        if (events.length === 0) {
-            document.getElementById("mostAttendedEvent").textContent = "No events available.";
-            return;
-        }
-
-        let mostAttendedEvent = events.reduce((maxEvent, currentEvent) => 
-            currentEvent.attendees.size > maxEvent.attendees.size ? currentEvent : maxEvent
-        , events[0]);
-
-        document.getElementById("mostAttendedEvent").textContent = `Event with the most attendees: ${mostAttendedEvent.title} with ${mostAttendedEvent.attendees.size} attendees.`;
-    };
-
-    displayEvents();
-});
-
+        events.forEach(event => {
+            event.toJSON = function () {
+                return {
+                    ...this,
+                    formattedDate: this.date.toLocaleDateString("en-US")
+                };
+            };
+        });
+        const eventsJson = JSON.stringify(events, null, 2);
+        console.log("Events JSON with formattedDate:");
+        console.log(eventsJson);
+        const firstEvent = events[0];
+        const firstEventProperties = `
+            <p>Keys: ${Object.keys(firstEvent).join(', ')}</p>
+            <p>Values: ${Object.values(firstEvent).join(', ')}</p>
+            <p>Entries: ${Object.entries(firstEvent).map(entry => entry.join(': ')).join(', ')}</p>
+        `;
+        document.getElementById("firstEventProperties").innerHTML = firstEventProperties;
+        console.log("Titles and dates of all events:");
+        events.forEach(event => {
+            console.log(`Title: ${event.title}, Date: ${event.date.toDateString()}`);
+        });
     </script>
 </body>
 </html>
-
 
 
